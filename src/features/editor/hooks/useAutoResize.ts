@@ -32,7 +32,7 @@ const useAutoResize = ({ canvasWrapper, canvas }: UseAutoResizeProps): void => {
     if (!workspace) return;
 
     // Calculate the scale needed to fit the workspace within the canvas dimensions
-    // @ts-ignore
+    // @ts-expect-error : findScaleToFit is not a function of fabric.util
     const scale = fabric.util.findScaleToFit(workspace, {
       width: offsetWidth,
       height: offsetHeight,
