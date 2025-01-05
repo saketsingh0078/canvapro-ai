@@ -15,3 +15,11 @@ export type SelectedTool =
   | "font"
   | "optacity"
   | "filter";
+
+export type Editor = {
+  addRectangle: () => void;
+  addCircle: () => void;
+  addTriangle: () => void;
+  addInverseTriangle: () => void;
+  addDiamond: () => void;
+};

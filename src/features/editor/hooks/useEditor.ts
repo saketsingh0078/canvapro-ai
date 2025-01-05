@@ -1,6 +1,13 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { fabric } from "fabric";
 import { useAutoResize } from "./useAutoResize";
+import {
+  CIRCLE_OPTIONS,
+  DIAMOND_OPTIONS,
+  RECTANGLE_OPTIONS,
+  TRIANGLE_OPTIONS,
+} from "@/features/editor/constants";
+import { Editor } from "@/features/editor/types";
 
 const useEditor = () => {
   const [canvasWrapper, setCanvasWrapper] = useState<HTMLDivElement | null>(
@@ -12,6 +19,86 @@ const useEditor = () => {
     canvasWrapper,
     canvas,
   });
+
+  const createEditor = ({ canvas }: { canvas: fabric.Canvas }): Editor => {
+    const getWorkSpace = () => {
+      return canvas
+        .getObjects()
+        .find((object) => object.name === "defaultCanvasWorkspace");
+    };
+    const centerObject = (object: fabric.Object) => {
+      const workspace = getWorkSpace();
+      const workspaceCenter = workspace?.getCenterPoint();
+      if (!workspaceCenter) return;
+      // Use _centerObject to center the object properly in the workspace. Note that centerObject does not work as expected if sidebar is open as the center point has changed after opening the sidebar. centerObject does not accept a second argument so we use _centerObject instead
+      // canvas?.centerObject(rectangleObject);
+      // @ts-expect-error: _centerObject is not in the TypeScript definitions
+      canvas._centerObject(object, workspaceCenter);
+    };
+    const addObjectToCanvas = (object: fabric.Object) => {
+      // Tip: Center the object before adding it to the canvas to make sure the center alignment is not recorded in the canvas history
+      centerObject(object);
+      canvas.add(object);
+      canvas.setActiveObject(object);
+    };
+
+    return {
+      addRectangle: () => {
+        const rectangleObject = new fabric.Rect({
+          ...RECTANGLE_OPTIONS,
+        });
+        addObjectToCanvas(rectangleObject);
+      },
+      addCircle: () => {
+        const circleObject = new fabric.Circle({
+          ...CIRCLE_OPTIONS,
+        });
+        addObjectToCanvas(circleObject);
+      },
+      addTriangle: () => {
+        const triangleObject = new fabric.Triangle({
+          ...TRIANGLE_OPTIONS,
+        });
+        addObjectToCanvas(triangleObject);
+      },
+      addInverseTriangle: () => {
+        const WIDTH = TRIANGLE_OPTIONS.width;
+        const HEIGHT = TRIANGLE_OPTIONS.height;
+        const triangleObject = new fabric.Polygon(
+          [
+            { x: 0, y: 0 },
+            { x: WIDTH, y: 0 },
+            { x: WIDTH / 2, y: HEIGHT },
+          ],
+          {
+            ...TRIANGLE_OPTIONS,
+          }
+        );
+        addObjectToCanvas(triangleObject);
+      },
+      addDiamond: () => {
+        const WIDTH = DIAMOND_OPTIONS.width;
+        const HEIGHT = DIAMOND_OPTIONS.height;
+        const diamondObject = new fabric.Polygon(
+          [
+            { x: WIDTH / 2, y: 0 },
+            { x: WIDTH, y: HEIGHT / 2 },
+            { x: WIDTH / 2, y: HEIGHT },
+            { x: 0, y: HEIGHT / 2 },
+          ],
+          {
+            ...DIAMOND_OPTIONS,
+          }
+        );
+        addObjectToCanvas(diamondObject);
+      },
+    };
+  };
+
+  const editor = useMemo(() => {
+    if (!canvas) return null;
+    return createEditor({ canvas });
+  }, [canvas]);
 
   const init = useCallback(
     ({
@@ -73,7 +160,7 @@ const useEditor = () => {
     []
   );
 
-  return { init };
+  return { init, editor };
 };
 
 export { useEditor };

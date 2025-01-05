@@ -8,16 +8,15 @@ import Sidebar from "@/features/editor/components/sidebar";
 import Toolbar from "@/features/editor/components/toolbar";
 import Footer from "@/features/editor/components/footer";
 import { SelectedTool } from "@/features/editor/types";
+import ElementSidebar from "@/features/editor/components/elementSidebar";
 
 const Editor = () => {
-  const { init } = useEditor();
+  const { init, editor } = useEditor();
 
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef(null);
 
   const [selectedTool, setSelectedTool] = useState<SelectedTool>("select");
-
-  //added useCallback because
 
   const onChangeSelectedTool = useCallback(
     (tool: SelectedTool) => {
@@ -52,11 +51,19 @@ const Editor = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <Navbar />
+      <Navbar
+        selectedTool={selectedTool}
+        onChangeSelectedTool={onChangeSelectedTool}
+      />
       <div className="flex absolute h-[calc(100%-56px)] w-full top-14">
         <Sidebar
           selectedTool={selectedTool}
           onChangeSelectedTool={onChangeSelectedTool}
+        />
+        <ElementSidebar
+          selectedTool={selectedTool}
+          onChangeSelectedTool={onChangeSelectedTool}
+          editor={editor}
         />
         <main className="flex relative overflow-auto bg-zinc-900 flex-1 flex-col">
           <Toolbar />
