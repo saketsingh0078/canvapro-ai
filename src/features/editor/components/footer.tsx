@@ -1,6 +1,8 @@
+import React from "react";
+
 const Footer = () => {
   return (
-    <footer className="flex flex-row-reverse w-full border-t-2 items-center h-10 overflow-x-auto px-2 gap-1 shrink-0 bg-zinc-900">
+    <footer className="h-10 bg-zinc-900 w-full flex items-center overflow-x-auto px-2 gap-1 shrink-0 flex-row-reverse">
       Footer
     </footer>
   );

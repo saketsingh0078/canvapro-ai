@@ -1,33 +1,40 @@
 import { useCallback, useState } from "react";
 import { fabric } from "fabric";
 import { useAutoResize } from "./useAutoResize";
-import { init } from "next/dist/compiled/webpack/webpack";
 
 const useEditor = () => {
   const [canvasWrapper, setCanvasWrapper] = useState<HTMLDivElement | null>(
     null
   );
-
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
 
-  useAutoResize({ canvasWrapper, canvas });
+  useAutoResize({
+    canvasWrapper,
+    canvas,
+  });
 
   const init = useCallback(
     ({
-      initialWorkspace,
+      initialCanvasWrapper,
       initialCanvas,
     }: {
-      initialWorkspace: HTMLDivElement;
+      initialCanvasWrapper: HTMLDivElement;
       initialCanvas: fabric.Canvas;
     }) => {
+      console.log("Initializing Editor... 🚀");
+
+      // Set the canvas properties - Object properties
       fabric.Object.prototype.set({
-        borderColor: "#8b3dff",
-        cornerColor: "#fff",
-        borderScaleFactor: 2.5,
+        cornerColor: "#FFF",
         cornerStyle: "circle",
+        borderColor: "#8b3dff",
+        borderScaleFactor: 2.5,
         transparentCorners: false,
+        borderOpacityWhenMoving: 0.8,
+        cornerStrokeColor: "#8b3dff",
       });
 
+      // Create a rectangle object to define the workspace of the canvas
       const defaultCanvasWorkspace = new fabric.Rect({
         width: 1080,
         height: 1920,
@@ -40,32 +47,33 @@ const useEditor = () => {
           blur: 10,
         }),
       });
+      // Set the height and width of the canvas-container div to the height and width of the canvas wrapper. offsetHeight vs clientHeight: https://stackoverflow.com/questions/21064101/understanding-offsetwidth-clientwidth-scrollwidth-and-height-respectively
+      initialCanvas.setHeight(initialCanvasWrapper.offsetHeight);
+      initialCanvas.setWidth(initialCanvasWrapper.offsetWidth);
 
-      initialCanvas.setHeight(initialWorkspace.offsetHeight);
-      initialCanvas.setWidth(initialWorkspace.offsetWidth);
-
+      // Define the workspace of the canvas
       initialCanvas.add(defaultCanvasWorkspace);
       initialCanvas.centerObject(defaultCanvasWorkspace);
-
+      // element outside the defaultCanvasWorkspace rectangle will not be visible
       initialCanvas.clipPath = defaultCanvasWorkspace;
 
-      setCanvasWrapper(initialWorkspace);
+      // Set the canvas to the state
       setCanvas(initialCanvas);
+      setCanvasWrapper(initialCanvasWrapper);
 
-      const rectObject = new fabric.Rect({
-        width: 100,
-        height: 220,
+      const rectangleObject = new fabric.Rect({
+        width: 300,
+        height: 300,
         fill: "red",
       });
 
-      initialCanvas.add(rectObject);
-      initialCanvas.centerObject(rectObject);
-
-      console.log("initialisation init");
+      initialCanvas.add(rectangleObject);
+      initialCanvas.centerObject(rectangleObject);
     },
     []
   );
+
   return { init };
 };
 
-export default useEditor;
+export { useEditor };

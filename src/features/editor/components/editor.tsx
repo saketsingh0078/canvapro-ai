@@ -1,44 +1,72 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import useEditor from "../hooks/useEditor";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useEditor } from "@/features/editor/hooks/useEditor";
 import { fabric } from "fabric";
-import Navbar from "./navbar";
-import Sidebar from "./sidebar";
-import Toolbar from "./toolbar";
-import Footer from "./footer";
+import Navbar from "@/features/editor/components/navbar";
+import Sidebar from "@/features/editor/components/sidebar";
+import Toolbar from "@/features/editor/components/toolbar";
+import Footer from "@/features/editor/components/footer";
+import { SelectedTool } from "@/features/editor/types";
 
 const Editor = () => {
   const { init } = useEditor();
-  const workspaceRef = useRef<HTMLDivElement>(null);
+
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef(null);
 
+  const [selectedTool, setSelectedTool] = useState<SelectedTool>("select");
+
+  //added useCallback because
+
+  const onChangeSelectedTool = useCallback(
+    (tool: SelectedTool) => {
+      if (tool === selectedTool) return setSelectedTool("select");
+      if (tool === "draw") {
+        //draw
+      }
+      if (selectedTool === "draw") {
+        // exit draw
+      }
+      setSelectedTool(tool);
+    },
+    [selectedTool]
+  );
+
   useEffect(() => {
-    const canva = new fabric.Canvas(canvasRef.current, {
+    const canvas = new fabric.Canvas(canvasRef.current, {
+      // This will make sure that the controls of the objects are above the overlay
       controlsAboveOverlay: true,
       preserveObjectStacking: true,
     });
 
     init({
-      initialWorkspace: workspaceRef.current!,
-      initialCanvas: canva,
+      initialCanvasWrapper: canvasWrapperRef.current!,
+      initialCanvas: canvas,
     });
 
     return () => {
-      canva.dispose();
+      canvas.dispose();
     };
   }, [init]);
 
   return (
-    <div className="h-full flex flex-col w-full ">
+    <div className="h-full flex flex-col">
       <Navbar />
-      <div className="flex absolute h-[calc(100%- 56px)] w-full flex top-14">
-        <Sidebar />
+      <div className="flex absolute h-[calc(100%-56px)] w-full top-14">
+        <Sidebar
+          selectedTool={selectedTool}
+          onChangeSelectedTool={onChangeSelectedTool}
+        />
         <main className="flex relative overflow-auto bg-zinc-900 flex-1 flex-col">
           <Toolbar />
-          <div className="h-[calc(100%-160px)] bg-zinc-900" ref={workspaceRef}>
+          <div
+            className="h-[calc(100%-96px)] flex-1 bg-zinc-900"
+            ref={canvasWrapperRef}
+          >
             <canvas ref={canvasRef} />
           </div>
+
           <Footer />
         </main>
       </div>
