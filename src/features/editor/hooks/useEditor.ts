@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { fabric } from "fabric";
 import { useAutoResize } from "./useAutoResize";
+import { init } from "next/dist/compiled/webpack/webpack";
 
 const useEditor = () => {
   const [canvasWrapper, setCanvasWrapper] = useState<HTMLDivElement | null>(
